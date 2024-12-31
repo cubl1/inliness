@@ -6,15 +6,20 @@ import asyncio
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-api = '🤔'
+api = 'j'
 bot = Bot(token=api)
 dp = Dispatcher(bot, storage= MemoryStorage())
 
-kb = ReplyKeyboardMarkup()
-inform = KeyboardButton(text='Информация')
-calculate = KeyboardButton(text='Рассчитать')
-kb.add(inform)
-kb.add(calculate)
+kb = ReplyKeyboardMarkup(
+    keyboard= [
+        [KeyboardButton(text='Информация')],
+        [
+            KeyboardButton(text='Рассчитать'),
+            KeyboardButton(text='Купить')
+        ]
+    ], resize_keyboard= True
+)
+
 
 ikc = InlineKeyboardMarkup()
 button1 = InlineKeyboardButton(text = "Рассчитать норму каллорий", callback_data='calories')
@@ -29,12 +34,17 @@ class UserState(StatesGroup):
 @dp.message_handler(commands='start')
 async def start(message):
     print("Напечатан /start")
-    await message.answer('Привет! Я бот помогающий твоему здороью.', reply_markup= ikc)
+    await message.answer('Привет! Я бот помогающий твоему здороью.', reply_markup= kb)
 
 @dp.callback_query_handler(text='calories')
 async def set_age(call: types.CallbackQuery):
     await call.message.answer("Введите свой возраст:")
     await UserState.age.set()
+
+@dp.message_handler(text='Рассчитать')
+async def set_age(message):
+    await message.answer("Выберите опцию:", reply_markup=ikc)
+
 
 @dp.message_handler(text = 'Информация')
 async def all_massages(message):
@@ -44,7 +54,7 @@ async def all_massages(message):
 @dp.message_handler()
 async def all_massages(message):
     print(f'Напечатан {message.text}')
-    await message.answer('Введите команду /start, чтобы начать общение.')
+    await message.answer('Введите команду /start, чтобы начать общение.', reply_markup= kb)
 
 @dp.callback_query_handler(text='formulas')
 async def get_formulas(call: types.CallbackQuery):
